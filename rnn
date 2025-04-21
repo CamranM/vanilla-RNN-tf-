@@ -1,0 +1,32 @@
+import numpy as np
+from tensorflow.keras import layers, models
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.regularizers import l2
+
+'''
+simple RNN layers from keras
+'''
+
+# Input layer 
+inputs = layers.Input(shape=(X_train.shape[1], X_train.shape[2]))
+
+# First RNN layer with L2 Regularization & Dropout
+x = layers.SimpleRNN(128, return_sequences=True, kernel_regularizer=l2(0.0001))(inputs)
+x = layers.Activation("relu")(x) 
+#x = layers.Dropout(0.2)(x) 
+x = layers.SimpleRNN(128, return_sequences=True)(x)
+#x = layers.Dropout(0.2)(x)
+x = layers.SimpleRNN(64, return_sequences=False)(x)
+#x = layers.Dropout(0.2)(x)
+
+# Dense output layer
+outputs = layers.Dense(8, activation="tanh")(x)  
+
+# Create model
+model = models.Model(inputs=inputs, outputs=outputs)
+
+# gradient clipping for stability 
+optimizer = Adam(learning_rate=0.0001, clipnorm=1.0)  # Clip gradients by norm
+model.compile(optimizer=optimizer, loss='mean_absolute_error')
+
+model.summary()
